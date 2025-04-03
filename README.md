@@ -48,3 +48,13 @@ uvicorn api.main:app --reload
 
 1. Swagger API doc  `http://localhost:8000/docs`
 2. Swagger API redoc_url `http://localhost:8000/redo`
+
+## Project Structure
+
+- **API Layer** (`api/routers/`): Handles HTTP endpoints for both RAG and standard LLM queries
+- **Service Layer** (`api/services/`): Contains the core business logic for document processing, Q&A, and output formatting
+- **Utils** (`api/utils/`): Provides utilities for PDF handling and vector store operations
+- **Data** (`data/`): Stores source documents and vector embeddings
+- **Scripts** (`scripts/`): Contains standalone utilities for data management
+
+
