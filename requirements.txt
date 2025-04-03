@@ -1,0 +1,9 @@
+fastapi==0.110.1
+uvicorn==0.27.1
+langchain==0.1.12
+langchain-openai==0.0.6
+pydantic==2.6.3
+pydantic-settings==2.2.1
+python-dotenv==1.0.1
+pypdf==4.1.0
+faiss-cpu==1.7.4
