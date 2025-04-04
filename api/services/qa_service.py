@@ -34,19 +34,41 @@ def answer_with_rag(question: str, structured: bool = False) -> dict:
     """Get an answer about mobile features using RAG."""
     try:
         vector_store = get_vector_store()
-        
-        # similarity search to find relevant documents
-        docs = vector_store.similarity_search(question, k=3)
-        context = "\n\n".join([doc.page_content for doc in docs])
+        llm = OpenAI(temperature=settings.LLM_TEMPERATURE)
         
         if structured:
-            structured_guide = get_structured_output(question, context)
+            # Create a custom retriever that returns structured output
+            from langchain.schema.runnable import RunnableMap
+            
+            # Custom function to process the retrieved documents into structured output
+            def process_into_structured(inputs):
+                retrieved_docs = inputs["retrieved_documents"]
+                context = "\n\n".join([doc.page_content for doc in retrieved_docs])
+                return get_structured_output(inputs["query"], context)
+                
+            # Use RetrievalQA with custom document processing
+            qa_chain = RetrievalQA.from_chain_type(
+                llm=llm,
+                chain_type="stuff",
+                retriever=vector_store.as_retriever(search_kwargs={"k": 3}),
+                return_source_documents=True,
+                input_key="query"
+            )
+            
+            # Create a custom chain that processes the output of qa_chain
+            structured_chain = RunnableMap({
+                "query": lambda x: x["query"],
+                "retrieved_documents": lambda x: qa_chain.invoke(x)["source_documents"]
+            }) | process_into_structured
+            
+            structured_guide = structured_chain.invoke({"query": question})
             logger.info(f"RAG structured response generated for: {question}")
             return {
                 "answer": f"Here's how to use this feature: {structured_guide.feature_purpose}",
                 "structured_guide": structured_guide
             }
         
+        # Non-structured approach using RetrievalQA
         prompt_template = """
         You are a simpro mobile app expert helping users understand our SaaS product features.
         Use the following information from our help documents to answer the user's question.
@@ -63,7 +85,6 @@ def answer_with_rag(question: str, structured: bool = False) -> dict:
             template=prompt_template,
             input_variables=["context", "question"]
         )
-        llm = OpenAI(temperature=settings.LLM_TEMPERATURE)
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
