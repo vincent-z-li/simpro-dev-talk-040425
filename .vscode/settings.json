@@ -3,5 +3,6 @@
         "**/__pycache__": true,
         "**/*.pyc": true,
         "**/*.pyo": true
-    }
+    },
+    "jira-plugin.workingProject": ""
 }

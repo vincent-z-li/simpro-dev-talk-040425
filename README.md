@@ -30,8 +30,8 @@ pip install -r requirements.txt
 cp .env.dist .env
 ```
 
-4. Generate vectore store (FAISS)
-
+4. Generate vectore store ([FAISS (Facebook AI Similarity Search)](https://github.com/facebookresearch/faiss?tab=readme-ov-file#faiss))
+ 
 ```bash
 cd ./scripts
 python3 -m ingest_docs
